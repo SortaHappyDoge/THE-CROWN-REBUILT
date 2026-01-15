@@ -30,6 +30,7 @@ public class LimelightLocalization extends SubsystemBase {
         }
         isRed = false;
 
+        //Alliance based id filters can be implemented. Currently all the id numbers are used.
         if(isRed){
             LimelightHelpers.SetFiducialIDFiltersOverride(limelightName, validIDs);
         }

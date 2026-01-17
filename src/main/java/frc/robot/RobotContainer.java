@@ -28,7 +28,7 @@ public class RobotContainer {
         () -> m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
           joystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 
           joystick.getRawAxis(0)*Constants.kRobotMaxSpeed,
-          joystick.getRawAxis(2)*2*Math.PI,
+          joystick.getRawAxis(2)*Constants.kRobotMaxAngularSpeed,
           m_swerveDrive.getHeading(),
           true
           )), m_swerveDrive)

@@ -8,8 +8,8 @@ public final class Constants {
     //public static final double kRobotMaxSpeedAutonomous = 3; // In meters per second
     public static final double kRobotMaxAcceleration = 3; // In meters per second^2
     //public static final double kRobotMaxAccelerationAutonomous = 3; // In meters per second^2
-    public static final double kRobotMaxAngularSpeed = 2*180; // In degrees per second
-    //public static final double kRobotMaxAngularSpeedAutonomous = 2*Math.PI; // In degrees per second
+    public static final double kRobotMaxAngularSpeed = 2*Math.PI; // In radians per second
+    //public static final double kRobotMaxAngularSpeedAutonomous = 2*Math.PI; // In radians per second
     public static final double kRobotMaxAngularAcceleration = 2*Math.PI; // In degrees per second^2
     //public static final double kRobotMaxAngularAccelerationomous = 2*Math.PI; // In degrees per second^2
     public static final boolean kEnableModuleFeedforwards = false;

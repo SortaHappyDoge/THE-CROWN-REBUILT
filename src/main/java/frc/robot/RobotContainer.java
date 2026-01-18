@@ -28,7 +28,6 @@ public class RobotContainer {
         () -> m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
           joystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 
           joystick.getRawAxis(0)*Constants.kRobotMaxSpeed,
-          // TODO: Here kRobotMaxAngularSpeed should be used
           joystick.getRawAxis(2)*Constants.kRobotMaxAngularSpeed, 
           m_swerveDrive.getHeading(),
           true

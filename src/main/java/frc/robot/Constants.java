@@ -32,12 +32,13 @@ public final class Constants {
     public static final Translation2d kShooterOffset = new Translation2d(-1,1); // In meters
     public static final double kShooterOffsetDistance = Math.sqrt(Math.pow(kShooterOffset.getX(), 2)+Math.pow(kShooterOffset.getY(), 2));
     public static final double kShooterOffsetAngle = Math.atan2(kShooterOffset.getY(), kShooterOffset.getX()); // In radians
-    public static final Translation2d kTargetPosBlue = new Translation2d(5, 4);
-    public static final Translation2d kTargetPosRed = new Translation2d(11, 4);
     public static final double[] kShootingDistances = {3, 5, 8}; // Precalculated configs based on the distance to the target TODO: Write a better comment
     public static final double[] kShootingAngles = {80, 70, 60};
     public static final double[] kShootingRPMs = {5000, 5500, 6000};
     public static final double[] kAirtimes = {1, 0.8, 0.75};
+    public static final Translation2d kTargetPosBlue = new Translation2d(5, 4);
+    public static final Translation2d kTargetPosRed = new Translation2d(11, 4);
+    public static final double[] kCircleApproachPID = {1, 0, 0}; // P, I and D in that order
 
     /**
      * @WARNING these constants MUST be initialized at the start of the robot code.

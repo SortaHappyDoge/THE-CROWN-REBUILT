@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -11,6 +12,7 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 public class TurretSubsystem extends SubsystemBase {
     public double currentDistanceMultiplier;
+    public PIDController circleApproachPIDloop = new PIDController(Constants.kCircleApproachPID[0], Constants.kCircleApproachPID[1], Constants.kCircleApproachPID[2]);
 
 
     public TurretSubsystem(SwerveSubsystem m_swerveDrive){
@@ -47,7 +49,22 @@ public class TurretSubsystem extends SubsystemBase {
         return closestIndex;
     }
 
-    public Translation2d ForcedDistanceSpeed(Pose2d robotPose, Translation2d targetPosition, double targetDistance, Translation2d joystickInput){
+    /**
+     * Calculates the speed vector required to approach targetDistance plus joystickInput 
+     * requested speed perpendicular to the targetDistance. This allows the robot to stay
+     * at a targetDistance meters away from targetPosition no matter the input
+     * @param robotPose the current robot pose
+     * @param targetPosition target position we want the robot to stay targetDistance meters away from
+     * @param targetDistance requested distance in meters to the target
+     * @param joystickInput joystick axes used for robot drive
+     * @return returns the speed vector
+     */
+    public Translation2d ForcedDistanceSpeed(
+        Pose2d robotPose, 
+        Translation2d targetPosition, 
+        double targetDistance, 
+        Translation2d joystickInput
+    ){
         Translation2d shooterPosition = new Translation2d(
             Constants.kShooterOffsetDistance*Math.cos(Constants.kShooterOffsetAngle-robotPose.getRotation().getRadians()) + robotPose.getX(),
             Constants.kShooterOffsetDistance*Math.sin(Constants.kShooterOffsetAngle-robotPose.getRotation().getRadians()) + robotPose.getY()
@@ -66,20 +83,32 @@ public class TurretSubsystem extends SubsystemBase {
             targetPosition.getY()-shooterPosition.getY()
         );
 
-        /**
-         * TODO: Implement PID loop, currently given kRobotMaxSpeed as a placeholder
-         */
-        Translation2d speedVectorToCircle = new Translation2d(
-            MathUtil.clamp(distanceToCircle*Math.cos(angleOnCircle.getRadians())*Constants.kRobotMaxSpeed, -Constants.kRobotMaxSpeed, Constants.kRobotMaxSpeed),
-            MathUtil.clamp(distanceToCircle*Math.sin(angleOnCircle.getRadians())*Constants.kRobotMaxSpeed, -Constants.kRobotMaxSpeed, Constants.kRobotMaxSpeed)
+        ///
+        /// Operations for finding the approach speed to the closest circle with PID
+        /// 
+        Translation2d vectorToCircle = new Translation2d(
+            Math.cos(angleOnCircle.getRadians()),
+            Math.sin(angleOnCircle.getRadians())
         );
+        Translation2d speedVectorToCircle = vectorToCircle.times(MathUtil.clamp(
+            circleApproachPIDloop.calculate(distanceToCircle, 0)*Constants.kRobotMaxSpeed, 
+            -Constants.kRobotMaxSpeed, 
+            Constants.kRobotMaxSpeed
+        ));
+        ///
 
-        Translation2d inputSpeedVector = new Translation2d(
-            joystickInput.getX()*-1*Math.sin(angleOnCircle.getRadians())*Constants.kRobotMaxSpeed,
-            joystickInput.getY()*Math.cos(angleOnCircle.getRadians())*Constants.kRobotMaxSpeed
+        ///
+        /// Operations for converting joystick input to speed tangent to the circle
+        ///
+        Translation2d tangentVector = new Translation2d(
+            -Math.sin(angleOnCircle.getRadians()),
+            Math.cos(angleOnCircle.getRadians())
         );
-        
-        Translation2d totalSpeedVector = speedVectorToCircle.plus(inputSpeedVector);
+        double joystickProjectedMagnitude = tangentVector.dot(joystickInput);
+        Translation2d tangentInputSpeed = tangentVector.times(joystickProjectedMagnitude*Constants.kRobotMaxSpeed);
+        ///
+
+        Translation2d totalSpeedVector = speedVectorToCircle.plus(tangentInputSpeed);
 
         return totalSpeedVector;
     }

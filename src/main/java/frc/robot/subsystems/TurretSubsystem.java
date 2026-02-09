@@ -5,18 +5,22 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 public class TurretSubsystem extends SubsystemBase {
+    private SwerveSubsystem m_swerveDrive;
     public double currentDistanceMultiplier;
     public PIDController circleApproachPIDloop = new PIDController(Constants.kCircleApproachPID[0], Constants.kCircleApproachPID[1], Constants.kCircleApproachPID[2]);
-
+    public PIDController turretCorrectionPIDloop = new PIDController(Constants.kTurretCorrectionPID[0], Constants.kTurretCorrectionPID[1], Constants.kTurretCorrectionPID[2]);
 
     public TurretSubsystem(SwerveSubsystem m_swerveDrive){
-
+        this.m_swerveDrive = m_swerveDrive;
     }
 
     @Override
@@ -114,7 +118,16 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
 
-    public double ShooterAzimuthError(Translation2d perpendicularSpeed, Rotation2d currentHeading, double targetDistance, double timeOfArrival, int headingZone){
+    /**
+     * 
+     * @param perpendicularSpeed
+     * @param currentHeading
+     * @param targetDistance
+     * @param timeOfArrival
+     * @param headingZone
+     * @return calculated degrees of lead
+     */
+    public double ShooterAzimuthLead(Translation2d perpendicularSpeed, Rotation2d currentHeading, double targetDistance, double timeOfArrival, int headingZone){
         double targetErrorDistance = Math.hypot(perpendicularSpeed.getX(), perpendicularSpeed.getY())*timeOfArrival;
         double totalDisplacement = Math.hypot(targetDistance, targetErrorDistance);
         Rotation2d errorAlpha = Rotation2d.fromRadians(Math.asin(targetErrorDistance/totalDisplacement));
@@ -139,6 +152,32 @@ public class TurretSubsystem extends SubsystemBase {
         }
 
         currentDistanceMultiplier = errorAlpha.getCos();
+        
+        // Debug
+        System.out.println("targetErrorDistance: " + targetErrorDistance);
+        System.out.println("totalDisplacement: " + totalDisplacement);
+        System.out.println("errorAlpha: " + errorAlpha.getDegrees());
+        System.out.println("correctedHeading: " + correctedHeading.getDegrees());
+        System.out.println("currentHeading: " + currentHeading.getDegrees());
+        System.out.println("currentDistanceMultiplier: " + currentDistanceMultiplier);
+
+        //
         return correctedHeading.minus(currentHeading).getDegrees();
+    }
+
+    public Command LockRobotToTarget(Translation2d perpendicularSpeed, Rotation2d currentHeading, double targetDistance, double timeOfArrival, int headingZone){
+        return new RunCommand(
+            () -> {
+                System.out.print("Locked on target, ");
+                double azimuthError = ShooterAzimuthLead(perpendicularSpeed, currentHeading, targetDistance, timeOfArrival, headingZone); 
+                System.out.println("angle error: "+azimuthError);
+                m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
+                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 0.02), 
+                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(0)*Constants.kRobotMaxSpeed, 0.02), 
+                    MathUtil.clamp(turretCorrectionPIDloop.calculate(azimuthError, 0)*Constants.kRobotMaxAngularSpeed, -Constants.kRobotMaxAngularSpeed, Constants.kRobotMaxAngularSpeed), 
+                    currentHeading, true));
+            },
+            m_swerveDrive
+        );
     }
 }

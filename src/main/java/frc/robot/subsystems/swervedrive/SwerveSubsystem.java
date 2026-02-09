@@ -22,6 +22,8 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveDrive;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -30,14 +32,14 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 public class SwerveSubsystem extends SubsystemBase {
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"swerve");
-    SwerveDrive swerveDrive;
+    public SwerveDrive swerveDrive;
     
     LimelightLocalization localizationLimelight = new LimelightLocalization("limelight-localz");
     
-    public SwerveSubsystem(){
+    public SwerveSubsystem(Pose2d startPose){
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.POSE;
         try{
-            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.kRobotMaxSpeed, new Pose2d(4, 1, new Rotation2d(0)));
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.kRobotMaxSpeed, startPose);
         }
         catch(IOException err){
             System.err.println(err.getMessage());
@@ -69,7 +71,7 @@ public class SwerveSubsystem extends SubsystemBase {
             getHeading().getDegrees(), 0/*getYawVelocity().getDegrees() */
         );
         addVisionMeasurement();
-        System.out.println("balls");
+        //System.out.println("balls");
     }
 
     public ChassisSpeeds processVelocityToChassisSpeeds(
@@ -112,6 +114,12 @@ public class SwerveSubsystem extends SubsystemBase {
             0, 0, 0
         );
         if(visionEstimate == null) return;
+        if(visionEstimate.isMegaTag2){
+            swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 999999));
+        }
+        else{
+            swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(0.3, 0.3, 999999));
+        }
         swerveDrive.addVisionMeasurement(visionEstimate.pose, visionEstimate.timestampSeconds);
     }
 

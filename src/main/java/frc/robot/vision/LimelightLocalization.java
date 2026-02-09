@@ -18,7 +18,7 @@ public class LimelightLocalization extends SubsystemBase {
 
     public LimelightLocalization(String name){
         limelightName = name;
-        LimelightHelpers.SetIMUMode(name, 0);
+        LimelightHelpers.SetIMUMode(name, 1);
         initializeValidIDs();
     }
 

@@ -118,6 +118,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
 
+    /*public double AngleToTarget(Translation2d shooterPosition, Translation2d targetPosition){
+        double beta = Math.atan2();
+    }*/
+
     /**
      * 
      * @param perpendicularSpeed
@@ -172,8 +176,8 @@ public class TurretSubsystem extends SubsystemBase {
                 double azimuthError = ShooterAzimuthLead(perpendicularSpeed, currentHeading, targetDistance, timeOfArrival, headingZone); 
                 System.out.println("angle error: "+azimuthError);
                 m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
-                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 0.02), 
-                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(0)*Constants.kRobotMaxSpeed, 0.02), 
+                    -MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 0.02), 
+                    -MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(0)*Constants.kRobotMaxSpeed, 0.02), 
                     MathUtil.clamp(turretCorrectionPIDloop.calculate(azimuthError, 0)*Constants.kRobotMaxAngularSpeed, -Constants.kRobotMaxAngularSpeed, Constants.kRobotMaxAngularSpeed), 
                     currentHeading, true));
             },

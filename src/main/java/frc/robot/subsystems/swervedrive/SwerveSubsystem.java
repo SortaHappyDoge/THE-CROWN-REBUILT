@@ -3,14 +3,16 @@ package frc.robot.subsystems.swervedrive;
 import java.io.File;
 import java.io.IOException;
 
-import org.dyn4j.geometry.Rotation;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,16 +20,10 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.vision.LimelightHelpers;
 import frc.robot.vision.LimelightLocalization;
+import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import swervelib.SwerveDrive;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -96,6 +92,19 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     public void drive(ChassisSpeeds speeds){
         swerveDrive.drive(speeds);
+    }
+
+    /**
+     * @return blue alliance field origin robot position as a Translation2d object in in (Xmeters, Ymeters)
+     */
+    public Translation2d getRobotPosition(){
+        return swerveDrive.field.getRobotPose().getTranslation();
+    }
+    /**
+     * @return field relative robot speeds as a Translation2d object in (Xmeters per second, Ymeters per second)
+     */
+    public Translation2d getRobotSpeedsField(){
+        return new Translation2d(swerveDrive.getFieldVelocity().vxMetersPerSecond, swerveDrive.getFieldVelocity().vyMetersPerSecond) ;
     }
 
     /**

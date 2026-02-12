@@ -44,15 +44,6 @@ public class RobotContainer {
 								true)),
 						m_swerveDrive));
 		
-		new JoystickButton(driveJoystick, 1).whileTrue(
-			m_turret.LockRobotAtTarget(
-				new Translation2d(m_swerveDrive.swerveDrive.getFieldVelocity().vxMetersPerSecond, m_swerveDrive.swerveDrive.getFieldVelocity().vxMetersPerSecond),
-				m_swerveDrive.getHeading(),
-				Constants.kShootingDistances[0],
-				Constants.kAirtimes[0],
-				1
-			)
-		);
 	}
 
 	public Command getAutonomousCommand() {

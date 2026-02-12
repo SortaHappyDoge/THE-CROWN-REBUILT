@@ -1,23 +1,28 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+
+import java.io.Serial;
+
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 public class TurretSubsystem extends SubsystemBase {
     private SwerveSubsystem m_swerveDrive;
-    public double currentDistanceMultiplier;
-    public PIDController circleApproachPIDloop = new PIDController(Constants.kCircleApproachPID[0], Constants.kCircleApproachPID[1], Constants.kCircleApproachPID[2]);
-    public PIDController turretCorrectionPIDloop = new PIDController(Constants.kTurretCorrectionPID[0], Constants.kTurretCorrectionPID[1], Constants.kTurretCorrectionPID[2]);
+    //public double currentDistanceMultiplier;
+    //public PIDController turretCorrectionPIDloop = new PIDController(Constants.kTurretCorrectionPID[0], Constants.kTurretCorrectionPID[1], Constants.kTurretCorrectionPID[2]);
+
+    public double lastTargetOrientedShooterSpeedX = 0.0;
+    public double lastTargetOrientedShooterSpeedY = 0.0;
+    public double lastTimeToReachPeak = 0.0;
+    public double lastTimeToDescendFromPeak = 0.0;
+    public double lastShooterHeadingError = 0.0;
+    public double lastRequiredProjectileSpeedX = 0.0;
+    public double lastRequiredProjectileSpeedZ = 0.0;
+    public double lastRequiredShooterPitch = 0.0;
+
 
     public TurretSubsystem(SwerveSubsystem m_swerveDrive){
         this.m_swerveDrive = m_swerveDrive;
@@ -25,159 +30,105 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
+        Translation2d hubPosition;
+        if(DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) hubPosition = Constants.kHubPosRed;
+        else hubPosition = Constants.kHubPosBlue;
 
+        double desiredShooterHeading = CalculateRequiredShooterHeading(m_swerveDrive.getRobotPosition(), hubPosition);
+        double targetOrientedSpeed = CalculateTargetOrientedShooterSpeed(desiredShooterHeading, m_swerveDrive.getRobotSpeedsField());
+        double targetDistance = CalculateTargetDistance(m_swerveDrive.getRobotPosition(), hubPosition);
+        double totalProjectileAirtime = CalculateProjectileAirTime(0.5, Constants.kDistanceToPeakProjectileHeightMapper(targetDistance), hubPosition.getY());
+        double effectiveDistance = CalculateEffectiveDistance(
+            new Translation2d(lastTargetOrientedShooterSpeedX, lastTargetOrientedShooterSpeedY),
+            targetDistance, 
+            totalProjectileAirtime
+        );
+        double projectileSpeed = CalculateRequiredProjectileSpeed(lastTimeToReachPeak, lastTimeToDescendFromPeak, effectiveDistance);
+        System.out.println("Calculated desiredShooterHeading: " + desiredShooterHeading);
+        System.out.println("Calculated targetDistance: " + targetDistance);
+        System.out.println("Calculated totalProjectileAirtime: " + totalProjectileAirtime);
+        System.out.println("Calculated effectiveDistance: " + effectiveDistance);
+        System.out.println("Calculated projectileSpeed: " + projectileSpeed);
+        System.out.println("Calculated desiredShooterPitch: " + lastRequiredShooterPitch);
+        System.out.println("Calculated corrected shooter heading: " + (desiredShooterHeading+lastShooterHeadingError));
     }
 
-    /**
-     * TODO: Write better comments
-     * Function to find the closest distance from the currentPose to the targetPose in the targetList
-     * @param currentPose
-     * @param targetPose
-     * @param targetList
-     * @param distanceMultiplier default should be 1
-     * @return returns the index of the closest point inside targetList
-     */
-    public int FindClosestCircle(Translation2d currentPos, Translation2d targetPos, double[] targetList, double distanceMultiplier){
-        double distance = currentPos.getDistance(targetPos);
-        int closestIndex = -1;
-        double closestDistance = Double.POSITIVE_INFINITY;
+    /*public void LogCalculations(){
         
-        int i = 0;
-        for (double d : targetList) {
-            if(Math.abs(distance-(d*distanceMultiplier)) < closestDistance){
-                closestDistance = (distance-(d*distanceMultiplier));
-                closestIndex = i;
-            }
-            i++;
-        }
-        return closestIndex;
+    }*/
+    
+    public double CalculateRequiredShooterHeading(Translation2d shooterPosition, Translation2d targetPosition){
+        return (Math.atan2(shooterPosition.getY() - targetPosition.getY(), shooterPosition.getX() - targetPosition.getX())*180.0)/Math.PI;
     }
-
     /**
-     * Calculates the speed vector required to approach targetDistance plus joystickInput 
-     * requested speed perpendicular to the targetDistance. This allows the robot to stay
-     * at a targetDistance meters away from targetPosition no matter the input
-     * @param robotPose the current robot pose
-     * @param targetPosition target position we want the robot to stay targetDistance meters away from
-     * @param targetDistance requested distance in meters to the target
-     * @param joystickInput joystick axes used for robot drive
-     * @return returns the speed vector
+     * Casts the field relative speed of the shooter to parallel and perpendicular lines in the targets direction
+     * @param targetHeading heading of the target from the shooter in degrees, CalculateRequiredShooterHeading's return must be passed
+     * @param fieldRelativeShooterSpeeds shooter's field relative speeds in the X and Y axis in meters per second
+     * @return the total speed of the shooter(must be the same as the total of fieldRelativeShooterSpeeds) in meters per second
      */
-    public Translation2d ForcedDistanceSpeed(
-        Pose2d robotPose, 
-        Translation2d targetPosition, 
-        double targetDistance, 
-        Translation2d joystickInput
-    ){
-        Translation2d shooterPosition = new Translation2d(
-            Constants.kShooterOffsetDistance*Math.cos(Constants.kShooterOffsetAngle-robotPose.getRotation().getRadians()) + robotPose.getX(),
-            Constants.kShooterOffsetDistance*Math.sin(Constants.kShooterOffsetAngle-robotPose.getRotation().getRadians()) + robotPose.getY()
-        );
-        Rotation2d angleOnCircle = Rotation2d.fromRadians(Math.atan2(
-            targetPosition.getY()-shooterPosition.getY(), 
-            targetPosition.getX()-shooterPosition.getX()
-        ));
-        /*Translation2d circleInterceptionPoint = new Translation2d(
-            targetDistance*Math.cos(angleOnCircle.getRadians()) + targetPosition.getX(),
-            targetDistance*Math.sin(angleOnCircle.getRadians()) + targetPosition.getY()
-        );*/
+    public double CalculateTargetOrientedShooterSpeed(double targetHeading, Translation2d fieldRelativeShooterSpeeds){
+        double targetOrientedShooterSpeedX = (fieldRelativeShooterSpeeds.getX() * Math.cos((targetHeading*Math.PI)/180.0)) - (fieldRelativeShooterSpeeds.getY() * Math.sin((targetHeading*Math.PI)/180.0));
+        double targetOrientedShooterSpeedY = (fieldRelativeShooterSpeeds.getX() * Math.sin((targetHeading*Math.PI)/180.0)) + (fieldRelativeShooterSpeeds.getY() * Math.cos((targetHeading*Math.PI)/180.0));
+        
+        lastTargetOrientedShooterSpeedX = targetOrientedShooterSpeedX;
+        lastTargetOrientedShooterSpeedY = targetOrientedShooterSpeedY;
 
-        double distanceToCircle = targetDistance - Math.hypot(
-            targetPosition.getX()-shooterPosition.getX(), 
-            targetPosition.getY()-shooterPosition.getY()
-        );
-
-        ///
-        /// Operations for finding the approach speed to the closest circle with PID
-        /// 
-        Translation2d vectorToCircle = new Translation2d(
-            Math.cos(angleOnCircle.getRadians()),
-            Math.sin(angleOnCircle.getRadians())
-        );
-        Translation2d speedVectorToCircle = vectorToCircle.times(MathUtil.clamp(
-            circleApproachPIDloop.calculate(distanceToCircle, 0)*Constants.kRobotMaxSpeed, 
-            -Constants.kRobotMaxSpeed, 
-            Constants.kRobotMaxSpeed
-        ));
-        ///
-
-        ///
-        /// Operations for converting joystick input to speed tangent to the circle
-        ///
-        Translation2d tangentVector = new Translation2d(
-            -Math.sin(angleOnCircle.getRadians()),
-            Math.cos(angleOnCircle.getRadians())
-        );
-        double joystickProjectedMagnitude = tangentVector.dot(joystickInput);
-        Translation2d tangentInputSpeed = tangentVector.times(joystickProjectedMagnitude*Constants.kRobotMaxSpeed);
-        ///
-
-        Translation2d totalSpeedVector = speedVectorToCircle.plus(tangentInputSpeed);
-
-        return totalSpeedVector;
+        return Math.hypot(targetOrientedShooterSpeedX, targetOrientedShooterSpeedY);
     }
-
-
     /**
      * 
-     * @param perpendicularSpeed
-     * @param currentHeading
-     * @param targetDistance
-     * @param timeOfArrival
-     * @param headingZone
-     * @return calculated degrees of lead
+     * @param shooterPosition
+     * @param targetPosition
+     * @return
      */
-    public double ShooterAzimuthLead(Translation2d perpendicularSpeed, Rotation2d currentHeading, double targetDistance, double timeOfArrival, int headingZone){
-        double targetErrorDistance = Math.hypot(perpendicularSpeed.getX(), perpendicularSpeed.getY())*timeOfArrival;
-        double totalDisplacement = Math.hypot(targetDistance, targetErrorDistance);
-        Rotation2d errorAlpha = Rotation2d.fromRadians(Math.asin(targetErrorDistance/totalDisplacement));
-        Rotation2d correctedHeading = currentHeading; // Initialize uncorrected
-
-        switch (headingZone) {
-            case 1:
-                correctedHeading.minus(errorAlpha);
-                break;
-            case 2:
-                correctedHeading.plus(errorAlpha);
-                break;
-            case 3:
-                correctedHeading.minus(errorAlpha);
-                break;
-            case 4:
-                correctedHeading.plus(errorAlpha);
-                break;
-            default:
-                System.err.println("Invalid heading zone, must be from 1 to 4");
-                return 0;
-        }
-
-        currentDistanceMultiplier = errorAlpha.getCos();
+    public double CalculateTargetDistance(Translation2d shooterPosition, Translation2d targetPosition){
+        return Math.hypot(shooterPosition.getY() - targetPosition.getY(), shooterPosition.getX() - targetPosition.getX());
+    }
+    /**
+     * Calculates projectile airtime based on projectile's peak height and 
+     * sets lastTimeToReachPeak to timeToReachPeak and lastTimeToDescendFromPeak to lastTimeToDescendFromPeak
+     * @param projectileStartHeight the height at which the projectile leaves the shooter in meters
+     * @param projectilePeakHeight  highest point the projectile will reach in meters
+     * @param targetHeight  target height ground in meters
+     * @return projectile's total air time in seconds
+     */
+    public double CalculateProjectileAirTime(double projectileStartHeight, double projectilePeakHeight, double targetHeight){
+        double timeToReachPeak = Math.sqrt((2 * (projectilePeakHeight - projectileStartHeight)) / Constants.kGravitationalConstant);
+        lastTimeToReachPeak = timeToReachPeak;
+        double timeToDescendFromPeak = Math.sqrt((2 * (projectilePeakHeight - targetHeight)) / Constants.kGravitationalConstant);
+        lastTimeToDescendFromPeak = timeToDescendFromPeak;
         
-        // Debug
-        System.out.println("targetErrorDistance: " + targetErrorDistance);
-        System.out.println("totalDisplacement: " + totalDisplacement);
-        System.out.println("errorAlpha: " + errorAlpha.getDegrees());
-        System.out.println("correctedHeading: " + correctedHeading.getDegrees());
-        System.out.println("currentHeading: " + currentHeading.getDegrees());
-        System.out.println("currentDistanceMultiplier: " + currentDistanceMultiplier);
-
-        //
-        return correctedHeading.minus(currentHeading).getDegrees();
+        return timeToReachPeak + timeToDescendFromPeak;
     }
+    public double CalculateEffectiveDistance(Translation2d targetOrientedShooterSpeeds, double targetDistance, double totalCalculatedAirtime){
+        double targetErrorDistanceX = targetOrientedShooterSpeeds.getX() * totalCalculatedAirtime;
+        double targetErrorDistanceY = targetOrientedShooterSpeeds.getY() * totalCalculatedAirtime;
+        
+        double effectiveDistance = Math.hypot(targetDistance - targetErrorDistanceY, targetErrorDistanceX);
+        double shooterHeadingError = (Math.asin(targetErrorDistanceX/effectiveDistance)*180.0)/Math.PI;
+        lastShooterHeadingError = shooterHeadingError;
 
-    public Command LockRobotToTarget(Translation2d perpendicularSpeed, Rotation2d currentHeading, double targetDistance, double timeOfArrival, int headingZone){
-        return new RunCommand(
-            () -> {
-                System.out.print("Locked on target, ");
-                double azimuthError = ShooterAzimuthLead(perpendicularSpeed, currentHeading, targetDistance, timeOfArrival, headingZone); 
-                System.out.println("angle error: "+azimuthError);
-                m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
-                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(1)*Constants.kRobotMaxSpeed, 0.02), 
-                    MathUtil.applyDeadband(RobotContainer.driveJoystick.getRawAxis(0)*Constants.kRobotMaxSpeed, 0.02), 
-                    MathUtil.clamp(turretCorrectionPIDloop.calculate(azimuthError, 0)*Constants.kRobotMaxAngularSpeed, -Constants.kRobotMaxAngularSpeed, Constants.kRobotMaxAngularSpeed), 
-                    currentHeading, true));
-            },
-            m_swerveDrive
-        );
+        return effectiveDistance;
     }
+    /**
+     * Calculates the required projectile speed in order to reach the target point and 
+     * sets lastRequiredProjectileSpeedX to requiredProjectileSpeedX and lastRequiredProjectileSpeedY to requiredProjectileSpeedY and
+     * sets lastRequiredShooterPitch to requiredShooterPitch
+     * @param timeToReachPeak
+     * @param timeToDescendFromPeak
+     * @param targetDistance
+     * @return the total speed required for the projectile to reach the target
+     */
+    public double CalculateRequiredProjectileSpeed(double timeToReachPeak, double timeToDescendFromPeak, double targetDistance){
+        double requiredProjectileSpeedX = targetDistance / (timeToReachPeak + timeToDescendFromPeak);
+        lastRequiredProjectileSpeedX = requiredProjectileSpeedX;
+        double requiredProjectileSpeedZ = timeToReachPeak * Constants.kGravitationalConstant;
+        lastRequiredProjectileSpeedZ = requiredProjectileSpeedZ;
+        
+        double requiredShooterPitch = (Math.atan(lastRequiredProjectileSpeedZ/lastRequiredProjectileSpeedX)*180.0)/Math.PI;
+        lastRequiredShooterPitch = requiredShooterPitch;
+        
+        return Math.hypot(requiredProjectileSpeedX, requiredProjectileSpeedZ);
+    }
+    
 }

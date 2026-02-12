@@ -3,8 +3,6 @@ package frc.robot;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public final class Constants {
@@ -23,23 +21,54 @@ public final class Constants {
 
     public static final PathConstraints kPathfindingConstraints = new PathConstraints(
       kRobotMaxSpeed, kRobotMaxAcceleration,
-      kRobotMaxAngularSpeed, kRobotMaxAngularAcceleration);
+      kRobotMaxAngularSpeed, kRobotMaxAngularAcceleration
+	);
+
+
+	public static final double kGravitationalConstant = 9.81;	// In meters per second^2
 
 
     /**
      * @WARNING THESE ARE TEMPORARY VALUES MADE FOR TESTING
      */
-    public static final Translation2d kShooterOffset = new Translation2d(-1,1); // In meters
+    /*
+	public static final Translation2d kShooterOffset = new Translation2d(-1,1); // In meters
     public static final double kShooterOffsetDistance = Math.sqrt(Math.pow(kShooterOffset.getX(), 2)+Math.pow(kShooterOffset.getY(), 2));
     public static final double kShooterOffsetAngle = Math.atan2(kShooterOffset.getY(), kShooterOffset.getX()); // In radians
     public static final double[] kShootingDistances = {2, 3}; // Precalculated configs based on the distance to the target TODO: Write a better comment
     public static final double[] kShootingAngles = {80, 70};
     public static final double[] kShootingRPMs = {5000, 5500};
     public static final double[] kAirtimes = {1, 0.8};
-    public static final Translation2d kTargetPosBlue = new Translation2d(5, 4);
-    public static final Translation2d kTargetPosRed = new Translation2d(11, 4);
     public static final double[] kCircleApproachPID = {0.3, 0, 0}; // P, I and D in that order
     public static final double[] kTurretCorrectionPID = {20, 0, 0}; // P, I and D in that order
+    */
+
+	/**
+	 * @WARNING these values must be adjusted
+	 */
+	public static final Translation2d kHubPosBlue = new Translation2d(5, 4);
+    public static final Translation2d kHubPosRed = new Translation2d(11, 4);
+	public static final double kHubHeight = 2.0;
+
+
+	public static final double[] kShootingDistanceMinMax = {0, 8};	// First index for minimum, second index for maximum distance in meters
+	public static final double[] kPeakProjectileHeightMinMax = {kHubHeight + 0.10, kHubHeight + 2.0};	// First index for minimum, second index for maximum peak projectile height in meters
+    // public static final double kDistanceToPeakProjectileHeightConstant = 1.0/10.0;	// Not needed
+    /**
+	 * @param distance effective distance to target in meters
+	 * @return wanted peak height for the projectile
+	 */
+	public static final double kDistanceToPeakProjectileHeightMapper(double distance){
+		return 
+			(kShootingDistanceMinMax[1] - distance) *
+			(
+				(/*kDistanceToPeakProjectileHeightConstant * */(kPeakProjectileHeightMinMax[1] - kPeakProjectileHeightMinMax[0])) /
+		 		(kShootingDistanceMinMax[1] - kShootingDistanceMinMax[0])
+			)
+			+
+			kPeakProjectileHeightMinMax[0]
+		;
+	};
 
     /**
      * @WARNING these constants MUST be initialized at the start of the robot code.

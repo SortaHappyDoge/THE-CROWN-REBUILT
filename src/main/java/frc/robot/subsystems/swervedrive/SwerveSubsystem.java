@@ -59,6 +59,8 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.setHeadingCorrection(false);
             swerveDrive.setCosineCompensator(false);
         }
+
+        
     }
 
     @Override
@@ -67,7 +69,7 @@ public class SwerveSubsystem extends SubsystemBase {
             getHeading().getDegrees(), 0/*getYawVelocity().getDegrees() */
         );
         addVisionMeasurement();
-        //System.out.println("balls");
+        System.out.println("Heading: "+getHeading().getDegrees());
     }
 
     public ChassisSpeeds processVelocityToChassisSpeeds(
@@ -114,6 +116,16 @@ public class SwerveSubsystem extends SubsystemBase {
     public Rotation2d getHeading(){
         return swerveDrive.getYaw();
     }
+
+    /**
+     * Sets both the YAGSL gyro and odometry headings to newHeading
+     * @param newHeading heading in degrees
+     */
+    public void resetHeading(double newHeading){
+        swerveDrive.setGyro(new Rotation3d(Rotation2d.fromDegrees(newHeading)));
+        swerveDrive.resetOdometry(new Pose2d(swerveDrive.getPose().getX(), swerveDrive.getPose().getY(), Rotation2d.fromDegrees(newHeading)));
+    }
+
     public Rotation2d getYawVelocity(){
         return Rotation2d.fromRadians(swerveDrive.getGyroRotation3d().getZ());
     }

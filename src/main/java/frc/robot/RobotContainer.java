@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.TurretSubsystem;
@@ -25,7 +26,7 @@ public class RobotContainer {
 	public static Joystick driveJoystick = new Joystick(0);
 
 	public RobotContainer() {
-		m_swerveDrive = new SwerveSubsystem(new Pose2d(4, 1, new Rotation2d(0)));
+		m_swerveDrive = new SwerveSubsystem(new Pose2d(4, 1, new Rotation2d()));
 		m_turret = new TurretSubsystem(m_swerveDrive);
 		initializePathPlanner();
 
@@ -36,14 +37,29 @@ public class RobotContainer {
 		m_swerveDrive.setDefaultCommand(
 				new RunCommand(
 						() -> m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
-								MathUtil.applyDeadband(driveJoystick.getRawAxis(1) * Constants.kRobotMaxSpeed, 0.02),
-								MathUtil.applyDeadband(driveJoystick.getRawAxis(0) * Constants.kRobotMaxSpeed, 0.02),
+								-MathUtil.applyDeadband(driveJoystick.getRawAxis(1) * Constants.kRobotMaxSpeed, 0.02),
+								-MathUtil.applyDeadband(driveJoystick.getRawAxis(0) * Constants.kRobotMaxSpeed, 0.02),
 								-MathUtil.applyDeadband(driveJoystick.getRawAxis(2) * Constants.kRobotMaxAngularSpeed,
 										0.02),
 								m_swerveDrive.getHeading(),
 								true)),
 						m_swerveDrive));
 		
+		/*new JoystickButton(driveJoystick, 1).whileTrue(
+			m_turret.LockRobotToTarget(
+				new Translation2d(m_swerveDrive.swerveDrive.getFieldVelocity().vxMetersPerSecond, m_swerveDrive.swerveDrive.getFieldVelocity().vxMetersPerSecond),
+				m_swerveDrive.getHeading(),
+				Constants.kShootingDistances[0],
+				Constants.kAirtimes[0],
+				1
+			)
+		);*/
+
+		new JoystickButton(driveJoystick, 8).onTrue(
+			new InstantCommand(
+				() -> m_swerveDrive.resetHeading(0)
+			)
+		);
 	}
 
 	public Command getAutonomousCommand() {

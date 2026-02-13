@@ -37,8 +37,8 @@ public class RobotContainer {
 		m_swerveDrive.setDefaultCommand(
 				new RunCommand(
 						() -> m_swerveDrive.drive(m_swerveDrive.processVelocityToChassisSpeeds(
-								-MathUtil.applyDeadband(driveJoystick.getRawAxis(1) * Constants.kRobotMaxSpeed, 0.02),
-								-MathUtil.applyDeadband(driveJoystick.getRawAxis(0) * Constants.kRobotMaxSpeed, 0.02),
+								-MathUtil.applyDeadband(driveJoystick.getRawAxis(1) * Constants.kRobotMaxSpeed, 0.05),
+								-MathUtil.applyDeadband(driveJoystick.getRawAxis(0) * Constants.kRobotMaxSpeed, 0.05),
 								-MathUtil.applyDeadband(driveJoystick.getRawAxis(2) * Constants.kRobotMaxAngularSpeed,
 										0.02),
 								m_swerveDrive.getHeading(),

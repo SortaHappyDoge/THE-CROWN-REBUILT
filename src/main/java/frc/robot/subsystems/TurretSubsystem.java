@@ -37,14 +37,24 @@ public class TurretSubsystem extends SubsystemBase {
         double desiredShooterHeading = CalculateRequiredShooterHeading(m_swerveDrive.getRobotPosition(), hubPosition);
         double targetOrientedSpeed = CalculateTargetOrientedShooterSpeed(desiredShooterHeading, m_swerveDrive.getRobotSpeedsField());
         double targetDistance = CalculateTargetDistance(m_swerveDrive.getRobotPosition(), hubPosition);
-        double totalProjectileAirtime = CalculateProjectileAirTime(0.5, Constants.kDistanceToPeakProjectileHeightMapper(targetDistance), hubPosition.getY());
+        double totalProjectileAirtime = CalculateProjectileAirTime(0.5, Constants.kDistanceToPeakProjectileHeightMapper(targetDistance), Constants.kHubHeight);
         double effectiveDistance = CalculateEffectiveDistance(
             new Translation2d(lastTargetOrientedShooterSpeedX, lastTargetOrientedShooterSpeedY),
             targetDistance, 
             totalProjectileAirtime
         );
         double projectileSpeed = CalculateRequiredProjectileSpeed(lastTimeToReachPeak, lastTimeToDescendFromPeak, effectiveDistance);
+        for(int i = 0; i < 5; i++){
+            totalProjectileAirtime = CalculateProjectileAirTime(0.5, Constants.kDistanceToPeakProjectileHeightMapper(effectiveDistance), Constants.kHubHeight);
+            effectiveDistance = CalculateEffectiveDistance(
+                new Translation2d(lastTargetOrientedShooterSpeedX, lastTargetOrientedShooterSpeedY),
+                targetDistance, 
+                totalProjectileAirtime
+            );
+            projectileSpeed = CalculateRequiredProjectileSpeed(lastTimeToReachPeak, lastTimeToDescendFromPeak, effectiveDistance);    
+        }
         System.out.println("Calculated desiredShooterHeading: " + desiredShooterHeading);
+        System.out.println("Calculated peakProjectileHeight: " + Constants.kDistanceToPeakProjectileHeightMapper(targetDistance));
         System.out.println("Calculated targetDistance: " + targetDistance);
         System.out.println("Calculated totalProjectileAirtime: " + totalProjectileAirtime);
         System.out.println("Calculated effectiveDistance: " + effectiveDistance);
@@ -58,7 +68,7 @@ public class TurretSubsystem extends SubsystemBase {
     }*/
     
     public double CalculateRequiredShooterHeading(Translation2d shooterPosition, Translation2d targetPosition){
-        return (Math.atan2(shooterPosition.getY() - targetPosition.getY(), shooterPosition.getX() - targetPosition.getX())*180.0)/Math.PI;
+        return (Math.atan2(targetPosition.getY() - shooterPosition.getY(), targetPosition.getX() - shooterPosition.getX())*180.0)/Math.PI;
     }
     /**
      * Casts the field relative speed of the shooter to parallel and perpendicular lines in the targets direction
@@ -105,7 +115,7 @@ public class TurretSubsystem extends SubsystemBase {
         double targetErrorDistanceY = targetOrientedShooterSpeeds.getY() * totalCalculatedAirtime;
         
         double effectiveDistance = Math.hypot(targetDistance - targetErrorDistanceY, targetErrorDistanceX);
-        double shooterHeadingError = (Math.asin(targetErrorDistanceX/effectiveDistance)*180.0)/Math.PI;
+        double shooterHeadingError = (Math.atan2(targetErrorDistanceX, targetDistance - targetErrorDistanceY)*180.0)/Math.PI;
         lastShooterHeadingError = shooterHeadingError;
 
         return effectiveDistance;

@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public final class Constants {
@@ -46,9 +47,9 @@ public final class Constants {
 	/**
 	 * @WARNING these values must be adjusted
 	 */
-	public static final Translation2d kHubPosBlue = new Translation2d(5, 4);
-    public static final Translation2d kHubPosRed = new Translation2d(11, 4);
-	public static final double kHubHeight = 2.0;
+	public static final Translation2d kHubPosBlue = new Translation2d(4.626, 4.035);
+    public static final Translation2d kHubPosRed = new Translation2d( 12.896, 4.035);
+	public static final double kHubHeight =  1.828;
 
 
 	public static final double[] kShootingDistanceMinMax = {0, 8};	// First index for minimum, second index for maximum distance in meters
@@ -59,14 +60,16 @@ public final class Constants {
 	 * @return wanted peak height for the projectile
 	 */
 	public static final double kDistanceToPeakProjectileHeightMapper(double distance){
-		return 
-			(kShootingDistanceMinMax[1] - distance) *
+		return MathUtil.clamp(
+            (kShootingDistanceMinMax[1] - distance) *
 			(
 				(/*kDistanceToPeakProjectileHeightConstant * */(kPeakProjectileHeightMinMax[1] - kPeakProjectileHeightMinMax[0])) /
 		 		(kShootingDistanceMinMax[1] - kShootingDistanceMinMax[0])
 			)
 			+
-			kPeakProjectileHeightMinMax[0]
+			kPeakProjectileHeightMinMax[0], 
+            kPeakProjectileHeightMinMax[0], kPeakProjectileHeightMinMax[1])
+			
 		;
 	};
 

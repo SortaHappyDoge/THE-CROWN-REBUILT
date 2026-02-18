@@ -65,12 +65,10 @@ public class LimelightLocalization extends SubsystemBase {
     ){
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
-        if(mt1 == null){
-            return null;
+        if(mt1 == null || mt1.tagCount <= 0){
+        return null;
         }
-        if(mt1.tagCount <= 0){
-            return null;
-        }
+        
         if(
             mt1.tagCount >= mt1_threshold_tagCount && 
             mt1.avgTagDist <= mt1_threshold_distance && 
@@ -78,9 +76,11 @@ public class LimelightLocalization extends SubsystemBase {
         ){
             return mt1;
         }
-        else{
+        if(mt2 != null && mt2.tagCount > 0){
+
             return mt2;
-        }
+        } //check mt2
+        return null;
     }
 
 }

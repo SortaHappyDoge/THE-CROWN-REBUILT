@@ -31,8 +31,13 @@ public class TurretSubsystem extends SubsystemBase {
     @Override
     public void periodic(){
         Translation2d hubPosition;
-        if(DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) hubPosition = Constants.kHubPosRed;
-        else hubPosition = Constants.kHubPosBlue;
+        var alliance = DriverStation.getAlliance();
+        if(alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+        hubPosition = Constants.kHubPosRed;
+        }  
+        else {
+        hubPosition = Constants.kHubPosBlue;
+        }
 
         double desiredShooterHeading = CalculateRequiredShooterHeading(m_swerveDrive.getRobotPosition(), hubPosition);
         double targetOrientedSpeed = CalculateTargetOrientedShooterSpeed(desiredShooterHeading, m_swerveDrive.getRobotSpeedsField());

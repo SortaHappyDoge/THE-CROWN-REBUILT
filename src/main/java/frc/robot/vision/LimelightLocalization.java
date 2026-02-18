@@ -28,7 +28,11 @@ public class LimelightLocalization extends SubsystemBase {
         if (alliance.isPresent()) {
             isRed = alliance.get() == DriverStation.Alliance.Red;
         }
-        isRed = false;
+        else { 
+            isRed = false;
+
+        }
+        
 
         //Alliance based id filters can be implemented. Currently all the id numbers are used.
         if(isRed){

@@ -30,6 +30,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
+        if(!m_swerveDrive.isOperational()) return;
         Translation2d hubPosition;
         if(DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) hubPosition = Constants.kHubPosRed;
         else hubPosition = Constants.kHubPosBlue;

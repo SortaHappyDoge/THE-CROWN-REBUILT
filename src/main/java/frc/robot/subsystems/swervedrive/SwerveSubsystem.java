@@ -30,6 +30,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase {
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"swerve");
     public SwerveDrive swerveDrive;
+    private boolean isOperational = false;
     
     LimelightLocalization localizationLimelight = new LimelightLocalization("limelight-localz");
     
@@ -42,7 +43,6 @@ public class SwerveSubsystem extends SubsystemBase {
             System.err.println(err.getMessage());
             System.err.println("Cannot find swerve configuration files under: " + swerveJsonDirectory.getName());
             DriverStation.reportError("Cannot find swerve configuration files", err.getStackTrace());
-            swerveDrive = null;
             return;
 
         }
@@ -63,14 +63,19 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.setCosineCompensator(false);
         }
 
+        isOperational = true;
+
         
+    }
+    public boolean isOperational(){
+        return isOperational;
     }
 
     @Override
+    
     public void periodic(){
-        if (swerveDrive == null) {
-            return;
-        }
+        if(!isOperational) return;
+        
         localizationLimelight.setRobotOrientation(
             getHeading().getDegrees(), 0/*getYawVelocity().getDegrees() */
         );
@@ -99,6 +104,7 @@ public class SwerveSubsystem extends SubsystemBase {
         return speeds;
     }
     public void drive(ChassisSpeeds speeds){
+        if(!isOperational) return;
         swerveDrive.drive(speeds);
     }
 
@@ -106,12 +112,14 @@ public class SwerveSubsystem extends SubsystemBase {
      * @return blue alliance field origin robot position as a Translation2d object in in (Xmeters, Ymeters)
      */
     public Translation2d getRobotPosition(){
+        if(!isOperational) return new Translation2d();
         return swerveDrive.field.getRobotPose().getTranslation();
     }
     /**
      * @return field relative robot speeds as a Translation2d object in (Xmeters per second, Ymeters per second)
      */
     public Translation2d getRobotSpeedsField(){
+        if(!isOperational) return new Translation2d();
         return new Translation2d(swerveDrive.getFieldVelocity().vxMetersPerSecond, swerveDrive.getFieldVelocity().vyMetersPerSecond) ;
     }
 
@@ -120,6 +128,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @WARNING the return angle is CCW positive (hopefully ;-;)
      */
     public Rotation2d getHeading(){
+        if(!isOperational) return new Rotation2d();
         return swerveDrive.getYaw();
     }
 
@@ -128,15 +137,18 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param newHeading heading in degrees
      */
     public void resetHeading(double newHeading){
+        if(!isOperational) return;
         swerveDrive.setGyro(new Rotation3d(Rotation2d.fromDegrees(newHeading)));
         swerveDrive.resetOdometry(new Pose2d(swerveDrive.getPose().getX(), swerveDrive.getPose().getY(), Rotation2d.fromDegrees(newHeading)));
     }
 
     public Rotation2d getYawVelocity(){
+        if(!isOperational) return new Rotation2d();
         return Rotation2d.fromRadians(swerveDrive.getGyroRotation3d().getZ());
     }
 
     public void addVisionMeasurement(){
+        if(!isOperational) return;
         LimelightHelpers.PoseEstimate visionEstimate = localizationLimelight.getBotPoseEstimate(
             0, 0, 0
         );
@@ -155,7 +167,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * AutoBuilder configuration
      */
     public void configureAutoBuilder(){
-        if(!Constants.InitializedConstants.hasInitializedRobotConfig){
+        if(!isOperational || Constants.InitializedConstants.hasInitializedRobotConfig){
             return;
         }
 

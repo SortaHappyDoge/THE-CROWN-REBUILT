@@ -42,7 +42,9 @@ public class SwerveSubsystem extends SubsystemBase {
             System.err.println(err.getMessage());
             System.err.println("Cannot find swerve configuration files under: " + swerveJsonDirectory.getName());
             DriverStation.reportError("Cannot find swerve configuration files", err.getStackTrace());
-            System.exit(1);
+            swerveDrive = null;
+            return;
+
         }
 
         PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
@@ -66,6 +68,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
+        if (swerveDrive == null) {
+            return;
+        }
         localizationLimelight.setRobotOrientation(
             getHeading().getDegrees(), 0/*getYawVelocity().getDegrees() */
         );

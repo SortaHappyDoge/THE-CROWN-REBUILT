@@ -89,7 +89,7 @@ public class RobotContainer {
 			System.err.println(err.getMessage());
 			System.err.println("Cannot configure AutoBuilder with the acquired RobotConfig");
 			DriverStation.reportError("Cannot configure AutoBuilder", err.getStackTrace());
-			System.exit(1);
+			return;
 		}
 
 		m_swerveDrive.configureAutoBuilder();

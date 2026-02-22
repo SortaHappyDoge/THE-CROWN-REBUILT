@@ -167,7 +167,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * AutoBuilder configuration
      */
     public void configureAutoBuilder(){
-        if(!isOperational || Constants.InitializedConstants.hasInitializedRobotConfig){
+        if(!isOperational || !Constants.InitializedConstants.hasInitializedRobotConfig){
             return;
         }
 

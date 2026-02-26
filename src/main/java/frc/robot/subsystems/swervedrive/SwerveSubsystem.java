@@ -60,8 +60,6 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.setHeadingCorrection(false);
             swerveDrive.setCosineCompensator(false);
         }
-
-        
     }
 
     @Override
@@ -70,7 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
             getHeading().getDegrees(), 0/*getYawVelocity().getDegrees() */
         );
         addVisionMeasurement();
-        System.out.println("Heading: "+getHeading().getDegrees());
+        //System.out.println("Heading: "+getHeading().getDegrees());
     }
 
     public ChassisSpeeds processVelocityToChassisSpeeds(
@@ -115,15 +113,14 @@ public class SwerveSubsystem extends SubsystemBase {
      * @WARNING the return angle is CCW positive (hopefully ;-;)
      */
     public Rotation2d getHeading(){
-        return swerveDrive.getYaw();
-    }
+        return swerveDrive.getOdometryHeading();
 
+    }
     /**
      * Sets both the YAGSL gyro and odometry headings to newHeading
      * @param newHeading heading in degrees
      */
     public void resetHeading(double newHeading){
-        swerveDrive.setGyro(new Rotation3d(Rotation2d.fromDegrees(newHeading)));
         swerveDrive.resetOdometry(new Pose2d(swerveDrive.getPose().getX(), swerveDrive.getPose().getY(), Rotation2d.fromDegrees(newHeading)));
     }
 
@@ -133,14 +130,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void addVisionMeasurement(){
         LimelightHelpers.PoseEstimate visionEstimate = localizationLimelight.getBotPoseEstimate(
-            0, 0, 0
+            0, 0, 0,
+            0, 16, 360
         );
         if(visionEstimate == null) return;
         if(visionEstimate.isMegaTag2){
             swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 999999));
         }
         else{
-            swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(0.3, 0.3, 999999));
+            swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 999999));
         }
         swerveDrive.addVisionMeasurement(visionEstimate.pose, visionEstimate.timestampSeconds);
     }

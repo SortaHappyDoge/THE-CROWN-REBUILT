@@ -47,7 +47,7 @@ public class LimelightLocalization extends SubsystemBase {
     }
     
     /**
-     *
+     *  TODO: Update comments
      * @param mt1_threshold_tagCount the minimum amount of april tags needed in view at which mt1 results can be returned
      * @param mt1_threshold_distance the maximum distance at which mt1 results can be returned
      * @param mt1_threshold_angular_velocty the maximum angular velocity at which mt1 results can be returned
@@ -57,7 +57,10 @@ public class LimelightLocalization extends SubsystemBase {
     public LimelightHelpers.PoseEstimate getBotPoseEstimate(
         int mt1_threshold_tagCount, 
         double mt1_threshold_distance, 
-        double mt1_threshold_angular_velocty
+        double mt1_threshold_angular_velocty,
+        int mt2_threshold_tagCount,
+        double mt2_threshold_distance, 
+        double mt2_threshold_angular_velocty
     ){
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
@@ -74,9 +77,14 @@ public class LimelightLocalization extends SubsystemBase {
         ){
             return mt1;
         }
-        else{
-            return mt2;
+        if(
+            mt2.tagCount >= mt2_threshold_tagCount && 
+            mt2.avgTagDist <= mt2_threshold_distance && 
+            last_yaw_velocity <= mt2_threshold_angular_velocty
+        ){
+            return mt1;
         }
+        return null;
     }
 
 }

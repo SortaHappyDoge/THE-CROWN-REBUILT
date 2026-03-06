@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Prep"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ForceIntakeDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableMouth"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableTurret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartFeeder"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AngleIntake"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -82,7 +82,7 @@ public class LimelightLocalization extends SubsystemBase {
             mt2.avgTagDist <= mt2_threshold_distance && 
             last_yaw_velocity <= mt2_threshold_angular_velocty
         ){
-            return mt1;
+            return mt2;
         }
         return null;
     }

@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableTurret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Start"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Prep"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableMouth"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableTurret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableMouth"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartFeeder"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AngleIntake"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

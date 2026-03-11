@@ -1,6 +1,11 @@
 package frc.robot.subsystems;
 
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -30,8 +35,10 @@ public class IntakeSubsystem extends SubsystemBase {
     public SparkMaxConfig kIntakeArmConfig = new SparkMaxConfig();
     public SparkMax m_intakeMouth = new SparkMax(Constants.kIntakeMouthCANid, MotorType.kBrushless);
     public SparkMaxConfig kIntakeMouthConfig = new SparkMaxConfig();
-    public SparkMax m_feeder = new SparkMax(Constants.kFeederCANid, MotorType.kBrushless);
-    public SparkMaxConfig kFeederConfig = new SparkMaxConfig();
+    public TalonFX m_feeder = new TalonFX(Constants.kFeederCANid);
+    public TalonFXConfiguration kFeederConfig = new TalonFXConfiguration();
+    /*public SparkMax m_feeder = new SparkMax(Constants.kFeederCANid, MotorType.kBrushless);
+    public SparkMaxConfig kFeederConfig = new SparkMaxConfig();*/
     public SparkMax m_kicker /* :3 */ = new SparkMax(Constants.kKickerCANid, MotorType.kBrushless);
     public SparkMaxConfig kKickerConfig = new SparkMaxConfig();
 
@@ -102,7 +109,7 @@ public class IntakeSubsystem extends SubsystemBase {
         m_intakeMouth.configure(kIntakeMouthConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         
-        kFeederConfig.idleMode(IdleMode.kCoast);
+        /*kFeederConfig.idleMode(IdleMode.kCoast);
         kFeederConfig.smartCurrentLimit(40);
         kFeederConfig.inverted(Constants.kFeederMotorInverted);
         kFeederConfig.voltageCompensation(10);
@@ -122,6 +129,21 @@ public class IntakeSubsystem extends SubsystemBase {
         kFeederConfig.closedLoopRampRate(Constants.kFeederRampRate);
         m_feeder.configure(kFeederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         kFeederConfig.idleMode(IdleMode.kCoast);
+        */
+
+        kFeederConfig.MotorOutput.withNeutralMode(NeutralModeValue.Coast);
+        kFeederConfig.CurrentLimits.withSupplyCurrentLimit(40);
+        kFeederConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+        kFeederConfig.Voltage.withPeakForwardVoltage(10);
+        kFeederConfig.Voltage.withPeakReverseVoltage(-10);
+        kFeederConfig.DifferentialSensors.withSensorToDifferentialRatio(Constants.kFeederEncoderVelocityFactor);
+        //kFeederConfig.DifferentialSensors.withSensorToDifferentialRatio(Constants.kFeederEncoderPositionFactor);
+        kFeederConfig.Slot0.withKP(Constants.kFeederPIDF[0]);
+        kFeederConfig.Slot0.withKV(Constants.kFeederPIDF[3]);
+        kFeederConfig.MotorOutput.withPeakForwardDutyCycle(Constants.kFeederMaxSpeedPercentage);
+        kFeederConfig.MotorOutput.withPeakReverseDutyCycle(-Constants.kFeederMaxSpeedPercentage);
+        m_feeder.getConfigurator().apply(kFeederConfig);
+
 
 
         kKickerConfig.idleMode(IdleMode.kCoast);
@@ -148,7 +170,7 @@ public class IntakeSubsystem extends SubsystemBase {
         //dashboardPIDcontrolInitIntakeMouth();
         //dashboardPIDcontrolInitIntakeArm();
         //dashboardPIDcontrolInitKicker();
-        //dashboardPIDcontrolInitFeeder();
+        dashboardPIDcontrolInitFeeder();
     }
 
     
@@ -168,7 +190,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		//System.out.println("isArmDeployed: " + isArmDeployed);
         //dashboardPIDcontrolLoopIntakeMouth();
-        //dashboardPIDcontrolLoopFeeder();
+        dashboardPIDcontrolLoopFeeder();
     }
 
     public double getArmPosition(){
@@ -302,7 +324,10 @@ public class IntakeSubsystem extends SubsystemBase {
             m_feeder.set(0);
         }
         else{
-            m_feeder.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kFeederMaxSpeedRPM, Constants.kFeederMaxSpeedRPM), ControlType.kVelocity);
+            //m_feeder.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kFeederMaxSpeedRPM, Constants.kFeederMaxSpeedRPM), ControlType.kVelocity);
+            VelocityVoltage velocity = new VelocityVoltage(0);
+            velocity.Velocity = RPM / 60;
+            m_feeder.setControl(velocity);
         }
     }
 
@@ -470,16 +495,19 @@ public class IntakeSubsystem extends SubsystemBase {
             final double RPM = SmartDashboard.getNumber("Intake/FeederRPM", 0);
             final boolean run = SmartDashboard.getBoolean("Intake/RunFeeder", false);
     
-            SmartDashboard.putNumber("FeederRPM", m_feeder.getEncoder().getVelocity()/Constants.kFeederEncoderVelocityFactor);
-            SmartDashboard.putNumber("FeederCurrent", m_feeder.getOutputCurrent());
+            SmartDashboard.putNumber("FeederRPM", m_feeder.getVelocity().getValueAsDouble()/Constants.kFeederEncoderVelocityFactor);
+            SmartDashboard.putNumber("FeederCurrent", m_feeder.getSupplyCurrent().getValueAsDouble());
 
             if(p != lastP || d != lastD || f != lastF || RPM != lastRPM || run != lastRun){
                 lastP = p; lastD = d; lastF = f; lastRPM = RPM; lastRun = run;
-                kFeederConfig.closedLoop.pid(p, 0, d);
-                kFeederConfig.closedLoop.feedForward.kV(f);
-                m_feeder.configure(kFeederConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                kFeederConfig.Slot0.withKP(p);
+                kFeederConfig.Slot0.withKD(d);
+                kFeederConfig.Slot0.withKV(f);
+                m_feeder.getConfigurator().apply(kFeederConfig);
                 if(run){
-                    m_feeder.getClosedLoopController().setSetpoint(RPM, ControlType.kVelocity);
+                    VelocityVoltage velocity = new VelocityVoltage(0);
+                    velocity.Velocity = RPM / 60;
+                    m_feeder.setControl(velocity);
                 }
                 else{
                     m_feeder.set(0);

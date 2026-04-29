@@ -24,7 +24,7 @@ public final class Constants {
     public static final int kFrontRightSteerMotorCANid = 17;
     public static final int kFrontRightAzimuthEncoderCANid = 18;
 
-    public static final double kRobotMaxSpeed = 5.85216; // In meters per second
+    public static final double kRobotMaxSpeed = 4.38912; // In meters per second
     //public static final double kRobotMaxSpeedAutonomous = 3; // In meters per second
     public static final double kRobotMaxAcceleration = 3; // In meters per second^2
     //public static final double kRobotMaxAccelerationAutonomous = 3; // In meters per second^2
@@ -88,7 +88,7 @@ public final class Constants {
     public static final double kTurretHeight = 0.5;
 
 	public static final double[] kShootingDistanceMinMax = {0, 8};	// First index for minimum, second index for maximum distance in meters
-	public static final double[] kPeakProjectileHeightMinMax = {kHubHeight + 0.5, kHubHeight + 2};	// First index for minimum, second index for maximum peak projectile height in meters
+	public static final double[] kPeakProjectileHeightMinMax = {kHubHeight + 0.5, kHubHeight + 1.5};	// First index for minimum, second index for maximum peak projectile height in meters
     // public static final double kDistanceToPeakProjectileHeightConstant = 1.0/10.0;	// Not needed
     /**
 	 * @param distance effective distance to target in meters
@@ -112,7 +112,7 @@ public final class Constants {
     public static final int kTurretAzimuthMotorCANid = 20;
     public static final boolean kTurretAzimuthMotorInverted = false;
     public static final boolean kTurretAzimuthMotorEncoderInverted = false;
-    public static final double kTurretAzimuthMotorEncoderPositionFactor = 360.0/((48.0*98.0*1.15)/(12.0*14.0));
+    public static final double kTurretAzimuthMotorEncoderPositionFactor = 360.0/((48.0*98.0)/(12.0*14.0));
     public static final double kTurretAzimuthMotorMaxSpeedPercentage = 0.5;
     public static final double[] kTurretAzimuthMotorPID = {0.0175, 0 , 0.5};
     public static final double kTurretAzimuthMotorRampRate = 0.3;
@@ -121,12 +121,12 @@ public final class Constants {
     public static final int kTurretPitchMotorCANid = 21;
     public static final boolean kTurretPitchMotorInverted = false;
     public static final boolean kTurretPitchEncoderInverted = false;
-    public static final double kTurretPitchEncoderPositionFactor = 360.0/((194.0*34)/(16.0*10.0*1.0));
+    public static final double kTurretPitchEncoderPositionFactor = 360.0/((194.0*34*1.0)/(16.0*10.0*1.0));
     public static final double kTurretPitchMaxSpeedPercentage = 0.5;
     public static final double[] kTurretPitchPID = {0.15, 0 , 0};
     public static final double kTurretPitchRampRate = 0;
-    public static final double[] kTurretPitchMinMaxDegrees = {46, 75};
-    public static final double kTurretPitchOverride = 71;
+    public static final double[] kTurretPitchMinMaxDegrees = {33, 58};
+    public static final double kTurretPitchOverride = 64;
 
 
     public static final int kTurretFlywheelMotorCANid = 22;
@@ -135,18 +135,18 @@ public final class Constants {
     public static final double kTurretFlywheelEncoderPositionFactor = 360;
     public static final double kTurretFlywheelEncoderVelocityFactor = 1;
     public static final double kTurretFlywheelMaxSpeedPercentage = 1;
-    public static final double[] kTurretFlywheelPIDF = {0.2, 0 , 0, 0.135};
+    public static final double[] kTurretFlywheelPIDF = {0.2, 0 , 0, 0.13, 0.1}; // P, I, D, KV, KS
     public static final double kFlywheelMaxSpeedRPM = 4000;
     public static final double kFlywheelUnjamSpeedPercentage = 0.25;
     public static final double kTurretFlywheelRampRate = 0;
     public static final double kTurretFlywheelReadyRoom = 200;
     public static final double kFlywheelOverrideRPM = 2700;
 
-    public static final double kFlywheelEffectiveRadius = 0.03;
+    public static final double kFlywheelEffectiveRadius = 0.024;
 
     public static final double kTurretOnTheMoveAccelerationFeedForwardSeconds = 0.5;
 
-    public static final double kProjectilePeakHeightFromTurret = kHubHeight-kTurretHeight + 2.0;
+    public static final double kProjectilePeakHeightFromTurret = kHubHeight-kTurretHeight + 0.6;
     public static final double kProjectileFixedTotalAirtime = (Math.sqrt(2*(kProjectilePeakHeightFromTurret)/kGravitationalConstant)) + (Math.sqrt(2*(kProjectilePeakHeightFromTurret - kHubHeight)/kGravitationalConstant));
     public static final double kProjectileFixedVerticalSpeed = Math.sqrt(2*kGravitationalConstant*kProjectilePeakHeightFromTurret);
 
@@ -156,18 +156,18 @@ public final class Constants {
     public static final boolean kIntakeArmEncoderInverted = true;
     public static final double kIntakeArmEncoderPositionFactor = 360;
     public static final double kIntakeArmMotorEncoderPositionFactor = 360/(5*5*3);
-    public static final double kIntakeArmMaxSpeedPercentage = 0.45;
+    public static final double kIntakeArmMaxSpeedPercentage = 0.4;
     public static final double kIntakeArmForceMaxSpeedPercentage = 0.8;
     //public static final double kIntakeArmForceSpeedPercentage = 0.0;
-    public static final double[] kIntakeArmPIDF = {0.045, 0.0, 0.0, 0.52};  // P, I, D and F in that order
+    public static final double[] kIntakeArmPIDF = {0.02, 0.0, 0.0, 0.52};  // P, I, D and F in that order
     public static final double[] kIntakeArmDeployedPID = {0.2, 0, 0};
     public static final double[] kintakeArmForcePID = {0.2, 0, 0};
     public static final double kIntakeArmRampRate = 0.3;
     public static final double kIntakeArmEncoderOffset = 0;
     public static final double kIntakeArmClosedPosition = 70;    // In degrees
-    public static final double kIntakeArmMiddlePoint = 90;
+    public static final double kIntakeArmMiddlePoint = 120;
     public static final double[] kIntakeArmMinMax = {kIntakeArmClosedPosition, 170.0};
-    public static final double kIntakeArmTolerance = 5;   // In degrees
+    public static final double kIntakeArmTolerance = 15;   // In degrees
 
     public static final int kIntakeMouthCANid = 61;
     public static final boolean kIntakeMouthMotorInverted = false;
@@ -189,9 +189,9 @@ public final class Constants {
     public static final double kFeederMaxSpeedRPM = 4000;
     public static final double[] kFeederPIDF = {0.00005, 0, 0.000, 0.017}; // P, I, D and F in that order
     public static final double kFeederRampRate = 0;
-    public static final double kFeederOnSpeedRPM = 4000;
-    public static final double kFeederStandbySpeedRPM = -2000;
-    public static final double kFeederUnjamSpeedRPM = -4000;
+    public static final double kFeederOnSpeedRPM = 2000;
+    public static final double kFeederStandbySpeedRPM = -0; // Why the heck is this -0 :)
+    public static final double kFeederUnjamSpeedRPM = -1500;
 
     public static final int kKickerCANid = 27;
     public static final boolean kKickerMotorInverted = false;
@@ -203,7 +203,7 @@ public final class Constants {
     public static final double[] kKickerPIDF = {0.0002, 0, 0.000, 0.0007}; // P, I, D and F in that order
     public static final double kKickerRampRate = 0;
     public static final double kKickerOnSpeedRPM = 4000;
-    public static final double kKickerStandbySpeedRPM = -4000;
+    public static final double kKickerStandbySpeedRPM = -2000;
     public static final double kKickerUnjamSpeedRPM = 4000;
 
 

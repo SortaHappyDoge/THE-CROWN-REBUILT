@@ -31,13 +31,13 @@
         {
           "type": "named",
           "data": {
-            "name": "DeployIntake"
+            "name": "EnableMouth"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "EnableMouth"
+            "name": "DeployIntake"
           }
         },
         {

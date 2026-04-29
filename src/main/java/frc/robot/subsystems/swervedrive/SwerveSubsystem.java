@@ -81,13 +81,13 @@ public class SwerveSubsystem extends SubsystemBase {
         //System.out.println("Heading: "+getHeading().getDegrees());
     }
 
-    public void joystickDrive(double vx, double vy, double vomega, boolean fieldRelative){
+    public void joystickDrive(double vx, double vy, double vomega, double speedPercentage, boolean fieldRelative){
         if(DriverStation.getAlliance().get() == Alliance.Red){
             //return new RunCommand(
             //    () -> {
                     drive(processVelocityToChassisSpeeds(
-                        vx * -Constants.kRobotMaxSpeed * 0.4,
-                        vy * -Constants.kRobotMaxSpeed * 0.4,
+                        vx * -Constants.kRobotMaxSpeed * MathUtil.clamp(speedPercentage, 0, 1),
+                        vy * -Constants.kRobotMaxSpeed * MathUtil.clamp(speedPercentage, 0, 1),
                         vomega * Constants.kRobotMaxAngularSpeed,
                         getHeading(), 
                         fieldRelative
@@ -100,8 +100,8 @@ public class SwerveSubsystem extends SubsystemBase {
             //return new RunCommand(
             //    () -> {
                     drive(processVelocityToChassisSpeeds(
-                        vx * Constants.kRobotMaxSpeed,
-                        vy * Constants.kRobotMaxSpeed,
+                        vx * Constants.kRobotMaxSpeed * MathUtil.clamp(speedPercentage, 0, 1),
+                        vy * Constants.kRobotMaxSpeed * MathUtil.clamp(speedPercentage, 0, 1),
                         vomega * Constants.kRobotMaxAngularSpeed,
                         getHeading(), 
                         fieldRelative
@@ -203,8 +203,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void addVisionMeasurement(){
         LimelightHelpers.PoseEstimate visionEstimate = localizationLimelight.getBotPoseEstimate(
-            0, 0, 0,
-            0, 10, 360
+            2, 10, 360,
+            2, 10, 360
         );
         if(visionEstimate == null) return;
         if(visionEstimate.isMegaTag2){
@@ -240,7 +240,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     }
                 },
                 new PPHolonomicDriveController(
-                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID
+                        new PIDConstants(3.75, 0.0, 0.0), // Translation PID
                         new PIDConstants(30.0, 0.0, 0.0) // Rotation PID
                 ),
                 Constants.InitializedConstants.kRobotConfig, // The robot configuration settings in the PathPlanner GUI

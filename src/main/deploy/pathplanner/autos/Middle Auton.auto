@@ -5,18 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Middle Prep"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ForceIntakeDown"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "EnableMouth"
@@ -29,12 +17,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Middle Intake"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "EnableTurret"
@@ -44,6 +26,30 @@
           "type": "named",
           "data": {
             "name": "StartFeeder"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Prep"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableTurret"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableTurret"
           }
         },
         {

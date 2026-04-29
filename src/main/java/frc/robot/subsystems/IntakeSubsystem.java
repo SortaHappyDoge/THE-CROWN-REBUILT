@@ -10,9 +10,11 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -91,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
         kIntakeMouthConfig.idleMode(IdleMode.kCoast);
         kIntakeMouthConfig.smartCurrentLimit(40);
         kIntakeMouthConfig.inverted(Constants.kIntakeMouthMotorInverted);
-        kIntakeMouthConfig.voltageCompensation(10);
+        kIntakeMouthConfig.voltageCompensation(9);
         kIntakeMouthConfig.encoder
             //.inverted(Constants.kIntakeMouthEncoderInverted)
             .positionConversionFactor(Constants.kIntakeMouthEncoderPositionFactor)
@@ -132,10 +134,10 @@ public class IntakeSubsystem extends SubsystemBase {
         */
 
         kFeederConfig.MotorOutput.withNeutralMode(NeutralModeValue.Coast);
-        kFeederConfig.CurrentLimits.withSupplyCurrentLimit(40);
+        kFeederConfig.CurrentLimits.withSupplyCurrentLimit(80);
         kFeederConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
-        kFeederConfig.Voltage.withPeakForwardVoltage(10);
-        kFeederConfig.Voltage.withPeakReverseVoltage(-10);
+        kFeederConfig.Voltage.withPeakForwardVoltage(9);
+        kFeederConfig.Voltage.withPeakReverseVoltage(-9);
         kFeederConfig.DifferentialSensors.withSensorToDifferentialRatio(Constants.kFeederEncoderVelocityFactor);
         //kFeederConfig.DifferentialSensors.withSensorToDifferentialRatio(Constants.kFeederEncoderPositionFactor);
         kFeederConfig.Slot0.withKP(Constants.kFeederPIDF[0]);
@@ -147,7 +149,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
         kKickerConfig.idleMode(IdleMode.kCoast);
-        kKickerConfig.smartCurrentLimit(40);
+        kKickerConfig.smartCurrentLimit(80);
         kKickerConfig.inverted(Constants.kKickerMotorInverted);
         kKickerConfig.voltageCompensation(10);
         kKickerConfig.encoder
@@ -170,7 +172,7 @@ public class IntakeSubsystem extends SubsystemBase {
         //dashboardPIDcontrolInitIntakeMouth();
         //dashboardPIDcontrolInitIntakeArm();
         //dashboardPIDcontrolInitKicker();
-        dashboardPIDcontrolInitFeeder();
+        //dashboardPIDcontrolInitFeeder();
     }
 
     
@@ -190,7 +192,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 		//System.out.println("isArmDeployed: " + isArmDeployed);
         //dashboardPIDcontrolLoopIntakeMouth();
-        dashboardPIDcontrolLoopFeeder();
+        //dashboardPIDcontrolLoopFeeder();
     }
 
     public double getArmPosition(){
@@ -214,7 +216,7 @@ public class IntakeSubsystem extends SubsystemBase {
             m_intakeMouth.set(0);
         }
         else{
-            m_intakeMouth.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kIntakeMouthMaxSpeedRPM, Constants.kIntakeMouthMaxSpeedRPM), ControlType.kVelocity);
+            m_intakeMouth.set(RPM/Constants.kIntakeMouthMaxSpeedRPM);
         }
     }
 
@@ -325,9 +327,10 @@ public class IntakeSubsystem extends SubsystemBase {
         }
         else{
             //m_feeder.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kFeederMaxSpeedRPM, Constants.kFeederMaxSpeedRPM), ControlType.kVelocity);
-            VelocityVoltage velocity = new VelocityVoltage(0);
-            velocity.Velocity = RPM / 60;
-            m_feeder.setControl(velocity);
+            //VelocityVoltage velocity = new VelocityVoltage(0);
+            //velocity.Velocity = RPM / 60;
+            //m_feeder.setControl(velocity);
+            m_feeder.set(MathUtil.clamp(RPM / Constants.kFeederMaxSpeedRPM, -1.0, 1.0));
         }
     }
 
@@ -355,7 +358,8 @@ public class IntakeSubsystem extends SubsystemBase {
             m_kicker.set(0);
         }
         else{
-            m_kicker.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kKickerMaxSpeedRPM, Constants.kKickerMaxSpeedRPM), ControlType.kVelocity);
+            //m_kicker.getClosedLoopController().setSetpoint(MathUtil.clamp(RPM, -Constants.kKickerMaxSpeedRPM, Constants.kKickerMaxSpeedRPM), ControlType.kVelocity);
+            m_kicker.set(MathUtil.clamp(RPM/Constants.kKickerMaxSpeedRPM, -1.0, 1.0));
         }
     }
 

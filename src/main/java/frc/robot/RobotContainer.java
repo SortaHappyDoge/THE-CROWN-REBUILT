@@ -41,6 +41,7 @@ public class RobotContainer {
 	IntakeSubsystem m_intake;
 
 	public static Joystick driveJoystick = new Joystick(0);
+	public static Joystick operatorJoystick = new Joystick(1);
 	
 	public PIDController rotation_test = new PIDController(0.03, 0, 0.0003);
 
@@ -113,7 +114,7 @@ public class RobotContainer {
 		    rightTrenchLeavePath = PathPlannerPath.fromPathFile("RightTrenchLeave");
 			leftTrenchEnterPath = PathPlannerPath.fromPathFile("LeftTrenchEnter");
 			rightTrenchEnterPath = PathPlannerPath.fromPathFile("RightTrenchEnter");
-		    rotationPIDTest = PathPlannerPath.fromPathFile("RotationPIDTest");
+		    //rotationPIDTest = PathPlannerPath.fromPathFile("RotationPIDTest");
 		}
 		catch(Exception e){
 
@@ -168,7 +169,8 @@ public class RobotContainer {
 					m_swerveDrive.joystickDrive(
 						-MathUtil.applyDeadband(driveJoystick.getRawAxis(1), 0.05),
 						-MathUtil.applyDeadband(driveJoystick.getRawAxis(0), 0.05),
-						-MathUtil.applyDeadband(driveJoystick.getRawAxis(4), 0.05),
+						-MathUtil.applyDeadband(driveJoystick.getRawAxis(2), 0.05),
+						-(driveJoystick.getRawAxis(3)-1)/2,
 						true
 					);
 				},
@@ -176,7 +178,88 @@ public class RobotContainer {
 			)
 		);
 
-		new JoystickButton(driveJoystick, 2).onTrue(
+		new JoystickButton(driveJoystick, 1).onTrue(
+			new InstantCommand(() -> {m_intake.setMouthRPM(Constants.kIntakeMouthOnSpeedRPM); m_intake.isMouthOn = true;}, m_intake)
+			.andThen(new InstantCommand(() -> m_intake.toggleIntakeCmd(), m_intake))
+		);
+
+
+		new JoystickButton(driveJoystick, 7).onTrue(
+			new InstantCommand(() -> m_intake.toggleIntakeCmd(), m_intake)
+		);
+		new JoystickButton(driveJoystick, 8).onTrue(
+			new InstantCommand(() -> m_intake.toggleMouth(Constants.kIntakeMouthOnSpeedRPM), m_intake)
+		);
+
+		new JoystickButton(driveJoystick, 5).onTrue(
+			new InstantCommand(
+				() -> m_swerveDrive.resetHeading(180)
+			)
+		);
+
+		new JoystickButton(driveJoystick, 3).onTrue(trenchLeaveEnterLeft());
+		new JoystickButton(driveJoystick, 4).onTrue(trenchLeaveEnterRight());
+		
+
+
+		new JoystickButton(operatorJoystick, 4).onTrue(
+			new InstantCommand(
+				() -> m_intake.toggleCirculation(),
+				m_intake
+			)
+		);
+		new JoystickButton(operatorJoystick, 2).onTrue(
+			new InstantCommand(
+				() -> {m_turret.toggleTurretActive(); m_turret.toggleFlywheel();},
+				m_intake
+			)
+		);
+		new JoystickButton(operatorJoystick, 3).onTrue(
+			m_intake.unjam()
+		).onTrue(
+			new InstantCommand(
+				() -> {
+					m_turret.isUnjamming = true;
+					m_intake.isUnjamming = true;
+				}
+			)
+		).onFalse(
+			new InstantCommand(
+				() -> {
+					m_turret.isUnjamming = false;
+					m_intake.isUnjamming = false;
+				}
+			)
+		);
+
+		new JoystickButton(operatorJoystick, 1).onTrue(
+			new InstantCommand(() -> {
+				m_intake.feederOverride = !m_intake.feederOverride;
+			},
+			m_intake
+			)
+		);
+		new POVButton(operatorJoystick, 0).onTrue(
+			new InstantCommand(() -> {
+				m_turret.flywheelOverride = !m_turret.flywheelOverride;
+			},
+			m_turret
+			)
+		);
+
+		new JoystickButton(operatorJoystick, 5).onTrue(
+			new InstantCommand(
+				() -> m_intake.toggleIntakeCmd(),
+			 	m_intake
+			)
+		);
+		new JoystickButton(operatorJoystick, 6).onTrue(
+			new InstantCommand(
+				() -> {m_intake.toggleMouth(Constants.kIntakeMouthOnSpeedRPM);},
+				m_intake
+			)
+		);
+		/*new JoystickButton(driveJoystick, 2).onTrue(
 			new InstantCommand(
 				() -> {m_turret.toggleTurretActive();},
 				m_turret
@@ -196,12 +279,7 @@ public class RobotContainer {
 			 	m_intake
 			)
 		);*/
-		new JoystickButton(driveJoystick, 5).onTrue(
-			new InstantCommand(
-				() -> m_intake.toggleIntakeCmd(),
-			 	m_intake
-			)
-		);
+		/*
 		new JoystickButton(driveJoystick, 6).onTrue(
 			new InstantCommand(
 				() -> {m_intake.toggleMouth(Constants.kIntakeMouthOnSpeedRPM);},
@@ -256,16 +334,21 @@ public class RobotContainer {
 			)
 		);
 		
-		new POVButton(driveJoystick, 270).onTrue(
+		/*new POVButton(driveJoystick, 270).onTrue(
 			trenchLeaveEnterRight()
 		);
 		new POVButton(driveJoystick, 90).onTrue(
 			trenchLeaveEnterLeft()
-		);
+		);*/
 		new POVButton(driveJoystick, 180).onTrue(
 			new InstantCommand(
 				() -> CommandScheduler.getInstance().cancelAll()
 			)
+		);
+		new JoystickButton(driveJoystick, 2).onTrue(
+			new InstantCommand(
+				() -> CommandScheduler.getInstance().cancelAll()
+			)		
 		);
 	}
 

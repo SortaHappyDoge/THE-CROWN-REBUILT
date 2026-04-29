@@ -83,7 +83,7 @@ public class TurretSubsystem extends SubsystemBase {
         this.m_swerveDrive = m_swerveDrive;
         
         kTurretAzimuthMotorConfig.idleMode(IdleMode.kBrake);
-        kTurretAzimuthMotorConfig.smartCurrentLimit(70);
+        kTurretAzimuthMotorConfig.smartCurrentLimit(60);
         kTurretAzimuthMotorConfig.inverted(Constants.kTurretAzimuthMotorInverted);
         kTurretAzimuthMotorConfig.encoder
                 .positionConversionFactor(Constants.kTurretAzimuthMotorEncoderPositionFactor);
@@ -121,8 +121,8 @@ public class TurretSubsystem extends SubsystemBase {
         kTurretFlywheelConfiguration.withCurrentLimits(flywheelCurrentLimit);
         
         VoltageConfigs flywheelVoltageLimit = new VoltageConfigs();
-        flywheelVoltageLimit.PeakForwardVoltage = 10.0;
-        flywheelVoltageLimit.PeakReverseVoltage = -10.0;
+        flywheelVoltageLimit.PeakForwardVoltage = 7.5;
+        flywheelVoltageLimit.PeakReverseVoltage = -7.5;
         kTurretFlywheelConfiguration.withVoltage(flywheelVoltageLimit);
         kTurretFlywheelConfiguration.MotorOutput.withNeutralMode(NeutralModeValue.Coast);
         if (!Constants.kTurretFlywheelMotorInverted) {
@@ -134,11 +134,12 @@ public class TurretSubsystem extends SubsystemBase {
         kTurretFlywheelConfiguration.Slot0.withKI(Constants.kTurretFlywheelPIDF[1]);
         kTurretFlywheelConfiguration.Slot0.withKD(Constants.kTurretFlywheelPIDF[2]);
         kTurretFlywheelConfiguration.Slot0.withKV(Constants.kTurretFlywheelPIDF[3]);
+        kTurretFlywheelConfiguration.Slot0.withKS(Constants.kTurretFlywheelPIDF[4]);
         m_turretFlywheelMotor.getConfigurator().apply(kTurretFlywheelConfiguration);
 
         
 
-        //dashboardPIDcontrolInitFlywheel();
+        dashboardPIDcontrolInitFlywheel();
         //dashboardPIDcontrolInitTurretPitch();
         //dashboardPIDcontrolInitTurreAzimuth();
     }
@@ -214,7 +215,7 @@ public class TurretSubsystem extends SubsystemBase {
         
         SmartDashboard.putBoolean("TargetAcquired", isTargetAcquired);
 
-        //dashboardPIDcontrolLoopFlywheel();
+        dashboardPIDcontrolLoopFlywheel();
         // dashboardPIDcontrolLoopTurretPitch();
         //dashboardPIDcontrolLoopTurretAzimuth();
     }
@@ -529,8 +530,9 @@ public class TurretSubsystem extends SubsystemBase {
             return;
         }
 
-        if (desiredFlywheelRPM <= 0.001 
-            || Math.abs(lastDesiredShooterHeading - lastShooterHeadingError - (m_swerveDrive.getHeading().getDegrees() % 360) - (m_turretAzimuthMotor.getEncoder().getPosition()%360)) > Constants.kTurretAzimuthMotorToleranceDegrees
+        if (!flywheelOn
+            || desiredFlywheelRPM == 0.0 
+            || Math.abs(normalizeAngle(lastDesiredShooterHeading - lastShooterHeadingError - m_swerveDrive.getHeading().getDegrees() - m_turretAzimuthMotor.getEncoder().getPosition())) > Constants.kTurretAzimuthMotorToleranceDegrees
             ) {
             flywheelReady = false;
         } else {
@@ -547,7 +549,7 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public void turnTurretTo(double angle) {
-        m_turretAzimuthMotor.getClosedLoopController().setSetpoint(MathUtil.clamp(angle%360, 70, 360), ControlType.kPosition);
+        m_turretAzimuthMotor.getClosedLoopController().setSetpoint(MathUtil.clamp(normalizeAngle(angle), -160, 160), ControlType.kPosition);
     }
     public void toggleTurretActive() {
         isTurretActive = !isTurretActive;
@@ -570,6 +572,14 @@ public class TurretSubsystem extends SubsystemBase {
 
     public void setTurretPitch(double degrees){
         m_turretPitchMotor.getClosedLoopController().setSetpoint(MathUtil.clamp(degrees, Constants.kTurretPitchMinMaxDegrees[0], Constants.kTurretPitchMinMaxDegrees[1]), ControlType.kPosition);
+    }
+
+    public double normalizeAngle(double degrees)
+    {
+        degrees %= 360;
+        if (degrees > 180) degrees -= 360;
+        if (degrees < -180) degrees += 360;
+        return degrees;
     }
 
     public void dashboardPIDcontrolInitFlywheel() {

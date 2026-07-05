@@ -147,10 +147,10 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         
 
-        System.out.println("Current robot heading: " + currentRobotHeading);
-        System.out.println("Requested robot heading: " + desiredRobotHeading);
-        System.out.println("Correction intensity: " + headingCorrectionIntensity);
-        System.out.println("PID output: " + MathUtil.clamp(headingCorrectionPID.calculate(desiredRobotHeading - currentRobotHeading), -1, 1));
+        //System.out.println("Current robot heading: " + currentRobotHeading);
+        //System.out.println("Requested robot heading: " + desiredRobotHeading);
+        //System.out.println("Correction intensity: " + headingCorrectionIntensity);
+        //System.out.println("PID output: " + MathUtil.clamp(headingCorrectionPID.calculate(desiredRobotHeading - currentRobotHeading), -1, 1));
         drive(processVelocityToChassisSpeeds(
             vx * Constants.kRobotMaxSpeed, 
             vy * Constants.kRobotMaxSpeed, 

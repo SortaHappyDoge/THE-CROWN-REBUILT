@@ -69,7 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
         kIntakeArmConfig.idleMode(IdleMode.kBrake);
         kIntakeArmConfig.smartCurrentLimit(40);
         kIntakeArmConfig.inverted(Constants.kIntakeArmMotorInverted);
-        kIntakeArmConfig.voltageCompensation(10);
+        kIntakeArmConfig.voltageCompensation(9);
         kIntakeArmConfig.absoluteEncoder
             .inverted(Constants.kIntakeArmEncoderInverted)
             .positionConversionFactor(Constants.kIntakeArmEncoderPositionFactor)
@@ -93,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
         kIntakeMouthConfig.idleMode(IdleMode.kCoast);
         kIntakeMouthConfig.smartCurrentLimit(40);
         kIntakeMouthConfig.inverted(Constants.kIntakeMouthMotorInverted);
-        kIntakeMouthConfig.voltageCompensation(9);
+        kIntakeMouthConfig.voltageCompensation(11);
         kIntakeMouthConfig.encoder
             //.inverted(Constants.kIntakeMouthEncoderInverted)
             .positionConversionFactor(Constants.kIntakeMouthEncoderPositionFactor)
@@ -149,9 +149,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
         kKickerConfig.idleMode(IdleMode.kCoast);
-        kKickerConfig.smartCurrentLimit(80);
+        kKickerConfig.smartCurrentLimit(40);
         kKickerConfig.inverted(Constants.kKickerMotorInverted);
-        kKickerConfig.voltageCompensation(10);
+        kKickerConfig.voltageCompensation(9);
         kKickerConfig.encoder
             //.inverted(Constants.kKickerEncoderInverted)
             .positionConversionFactor(Constants.kKickerEncoderPositionFactor)
@@ -169,7 +169,7 @@ public class IntakeSubsystem extends SubsystemBase {
         m_kicker.configure(kKickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
     
-        //dashboardPIDcontrolInitIntakeMouth();
+        dashboardPIDcontrolInitIntakeMouth();
         //dashboardPIDcontrolInitIntakeArm();
         //dashboardPIDcontrolInitKicker();
         //dashboardPIDcontrolInitFeeder();
@@ -234,15 +234,15 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void forceArmDown(){
-        //m_intakeArm.set(Constants.kIntakeArmForceSpeedPercentage);
-        m_intakeArm.getClosedLoopController().setSetpoint(Constants.kIntakeArmMinMax[1], ControlType.kPosition, ClosedLoopSlot.kSlot1);
+        m_intakeArm.set(Constants.kIntakeArmForceSpeedPercentage);
+        //m_intakeArm.getClosedLoopController().setSetpoint(Constants.kIntakeArmMinMax[1], ControlType.kPosition, ClosedLoopSlot.kSlot1);
     }
 
     public FunctionalCommand deployIntakeCmd(){
         return new FunctionalCommand(
             () -> {
                 setArmAngle(Constants.kIntakeArmMinMax[1]); 
-                System.out.println("Deploying intake");
+                //System.out.println("Deploying intake");
             },
             () -> {
                 // System.out.println("Arm rot: " + getArmPosition());
@@ -251,7 +251,7 @@ public class IntakeSubsystem extends SubsystemBase {
             interrupted -> {
                 forceArmDown();
                 isArmDeployed = true;
-                System.out.println("Intake deployed");
+                //System.out.println("Intake deployed");
             },
             () -> {return Math.abs(Constants.kIntakeArmMinMax[1] - getArmPosition()) < Constants.kIntakeArmTolerance;},
 			this
@@ -263,7 +263,7 @@ public class IntakeSubsystem extends SubsystemBase {
             () -> {
                 setArmAngle(Constants.kIntakeArmMinMax[0]);
                 isMouthOn = false;
-                System.out.println("Retracting intake");
+                //System.out.println("Retracting intake");
             },
             () -> {
                 // System.out.println("Arm rot: " + getArmPosition());
@@ -272,7 +272,7 @@ public class IntakeSubsystem extends SubsystemBase {
             interrupted -> { 
                 isArmDeployed = false; 
                 m_intakeArm.set(0); 
-                System.out.println("Intake retracted"); 
+                //System.out.println("Intake retracted"); 
             }, 
             () -> {return (getArmPosition() - Constants.kIntakeArmMinMax[0]) < Constants.kIntakeArmTolerance;},
 			this
@@ -282,7 +282,7 @@ public class IntakeSubsystem extends SubsystemBase {
         return new FunctionalCommand(
             () -> {
                 intakeForcePID(Constants.kIntakeArmMinMax[1]);
-                System.out.println("Deploying intake");
+                //System.out.println("Deploying intake");
             },
             () -> {
                 // System.out.println("Arm rot: " + getArmPosition());
@@ -291,7 +291,7 @@ public class IntakeSubsystem extends SubsystemBase {
             interrupted -> {
                 forceArmDown();
                 isArmDeployed = true;
-                System.out.println("Intake deployed");
+                //System.out.println("Intake deployed");
             },
             () -> {return Math.abs(Constants.kIntakeArmMinMax[1] - getArmPosition()) < Constants.kIntakeArmTolerance*10;},
 			this

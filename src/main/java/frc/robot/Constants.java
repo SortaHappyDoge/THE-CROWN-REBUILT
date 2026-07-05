@@ -135,14 +135,14 @@ public final class Constants {
     public static final double kTurretFlywheelEncoderPositionFactor = 360;
     public static final double kTurretFlywheelEncoderVelocityFactor = 1;
     public static final double kTurretFlywheelMaxSpeedPercentage = 1;
-    public static final double[] kTurretFlywheelPIDF = {0.2, 0 , 0, 0.13, 0.1}; // P, I, D, KV, KS
+    public static final double[] kTurretFlywheelPIDF = {0.2, 0 , 0, 0.12, 0.1}; // P, I, D, KV, KS
     public static final double kFlywheelMaxSpeedRPM = 4000;
     public static final double kFlywheelUnjamSpeedPercentage = 0.25;
     public static final double kTurretFlywheelRampRate = 0;
     public static final double kTurretFlywheelReadyRoom = 200;
     public static final double kFlywheelOverrideRPM = 2700;
 
-    public static final double kFlywheelEffectiveRadius = 0.024;
+    public static final double kFlywheelEffectiveRadius = 0.021;
 
     public static final double kTurretOnTheMoveAccelerationFeedForwardSeconds = 0.5;
 
@@ -158,7 +158,7 @@ public final class Constants {
     public static final double kIntakeArmMotorEncoderPositionFactor = 360/(5*5*3);
     public static final double kIntakeArmMaxSpeedPercentage = 0.4;
     public static final double kIntakeArmForceMaxSpeedPercentage = 0.8;
-    //public static final double kIntakeArmForceSpeedPercentage = 0.0;
+    public static final double kIntakeArmForceSpeedPercentage = 0.1;
     public static final double[] kIntakeArmPIDF = {0.02, 0.0, 0.0, 0.52};  // P, I, D and F in that order
     public static final double[] kIntakeArmDeployedPID = {0.2, 0, 0};
     public static final double[] kintakeArmForcePID = {0.2, 0, 0};

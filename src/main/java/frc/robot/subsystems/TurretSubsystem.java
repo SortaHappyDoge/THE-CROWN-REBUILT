@@ -83,7 +83,8 @@ public class TurretSubsystem extends SubsystemBase {
         this.m_swerveDrive = m_swerveDrive;
         
         kTurretAzimuthMotorConfig.idleMode(IdleMode.kBrake);
-        kTurretAzimuthMotorConfig.smartCurrentLimit(60);
+        kTurretAzimuthMotorConfig.smartCurrentLimit(40);
+        kTurretAzimuthMotorConfig.voltageCompensation(8);
         kTurretAzimuthMotorConfig.inverted(Constants.kTurretAzimuthMotorInverted);
         kTurretAzimuthMotorConfig.encoder
                 .positionConversionFactor(Constants.kTurretAzimuthMotorEncoderPositionFactor);
@@ -99,6 +100,7 @@ public class TurretSubsystem extends SubsystemBase {
         m_turretAzimuthMotor.getEncoder().setPosition(180);
 
         kTurretPitchMotorConfig.smartCurrentLimit(40);
+        kTurretPitchMotorConfig.voltageCompensation(9);
         kTurretPitchMotorConfig.inverted(Constants.kTurretPitchMotorInverted);
         kTurretPitchMotorConfig.encoder
                 // .inverted(Constants.kTurretPitchEncoderInverted)
@@ -115,9 +117,9 @@ public class TurretSubsystem extends SubsystemBase {
 
         CurrentLimitsConfigs flywheelCurrentLimit = new CurrentLimitsConfigs();
         flywheelCurrentLimit.SupplyCurrentLimitEnable = true;
-        flywheelCurrentLimit.SupplyCurrentLimit = 70;
+        flywheelCurrentLimit.SupplyCurrentLimit = 60;
         flywheelCurrentLimit.SupplyCurrentLowerLimit = 40;
-        flywheelCurrentLimit.SupplyCurrentLowerTime = 1.0;
+        flywheelCurrentLimit.SupplyCurrentLowerTime = 0.2;
         kTurretFlywheelConfiguration.withCurrentLimits(flywheelCurrentLimit);
         
         VoltageConfigs flywheelVoltageLimit = new VoltageConfigs();
@@ -216,7 +218,7 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("TargetAcquired", isTargetAcquired);
 
         dashboardPIDcontrolLoopFlywheel();
-        // dashboardPIDcontrolLoopTurretPitch();
+        //dashboardPIDcontrolLoopTurretPitch();
         //dashboardPIDcontrolLoopTurretAzimuth();
     }
 

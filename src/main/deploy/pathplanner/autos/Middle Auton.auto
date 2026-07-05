@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "DisableTurret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "EnableMouth"
           }
         },
@@ -17,27 +23,9 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "EnableTurret"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Middle Prep"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "DisableTurret"
           }
         },
         {
@@ -50,6 +38,12 @@
           "type": "named",
           "data": {
             "name": "EnableTurret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartFeeder"
           }
         },
         {

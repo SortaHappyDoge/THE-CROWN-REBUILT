@@ -58,6 +58,7 @@ public class RobotContainer {
 		m_turret = new TurretSubsystem(m_swerveDrive);
 		m_intake = new IntakeSubsystem(m_turret);
 
+		
 		initializePathPlanner();
 
 		// PATPHLANNER
@@ -67,14 +68,14 @@ public class RobotContainer {
 				m_turret.flywheelOn = false;
 				m_turret.isTurretActive = false;
 				m_turret.turnTurretTo(180);
-				System.out.println("Disabbled turret");
+				//System.out.println("Disabbled turret");
 			},
 			m_turret
 		));
 		NamedCommands.registerCommand("DisableIntake", new InstantCommand(
 			() -> {
 				m_intake.setArmAngle(Constants.kIntakeArmClosedPosition);
-				System.out.println("Disabled intake");
+				//System.out.println("Disabled intake");
 			},
 			m_intake
 			));
@@ -90,21 +91,21 @@ public class RobotContainer {
 			() -> {
 				m_turret.flywheelOn = true;
 				m_turret.isTurretActive = true;
-				System.out.println("Enabled turret and flywheel");
+				//System.out.println("Enabled turret and flywheel");
 			},
 			m_turret
 		));
 		NamedCommands.registerCommand("StartFeeder", new InstantCommand(
 			() -> {
 				m_intake.toggleCirculation();
-				System.out.println("Started circulation");
+				//System.out.println("Started circulation");
 			},
 			m_intake
 		));
 		NamedCommands.registerCommand("AngleIntake", new InstantCommand(
 			() -> {
 				m_intake.setArmAngle(Constants.kIntakeArmMiddlePoint);
-				System.out.println("Disabled angling the intake, for... reasons...... ;-;");
+				//System.out.println("Disabled angling the intake, for... reasons...... ;-;");
 			},
 			m_intake
 		));
@@ -191,7 +192,7 @@ public class RobotContainer {
 			new InstantCommand(() -> m_intake.toggleMouth(Constants.kIntakeMouthOnSpeedRPM), m_intake)
 		);
 
-		new JoystickButton(driveJoystick, 5).onTrue(
+		new JoystickButton(driveJoystick, 11).onTrue(
 			new InstantCommand(
 				() -> m_swerveDrive.resetHeading(180)
 			)
